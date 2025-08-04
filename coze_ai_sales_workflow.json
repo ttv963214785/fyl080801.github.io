@@ -1,0 +1,338 @@
+{
+  "workflow": {
+    "name": "AI销售工作流",
+    "description": "智能AI销售助手，从客户识别到成交的全流程自动化工作流",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start_node",
+        "type": "start",
+        "name": "开始节点",
+        "position": {"x": 100, "y": 100},
+        "data": {
+          "variables": [
+            {
+              "name": "customer_info",
+              "type": "string",
+              "label": "客户基本信息",
+              "required": true,
+              "description": "请输入客户的基本信息（公司名称、行业、规模等）"
+            },
+            {
+              "name": "inquiry_content",
+              "type": "string", 
+              "label": "咨询内容",
+              "required": true,
+              "description": "客户的具体咨询内容和需求描述"
+            }
+          ]
+        }
+      },
+      {
+        "id": "customer_classification",
+        "type": "llm",
+        "name": "客户分类",
+        "position": {"x": 300, "y": 100},
+        "data": {
+          "model": "doubao-function-call-32k",
+          "single_or_batch": "single",
+          "inputs": [
+            {
+              "name": "customer_data",
+              "value": "{{customer_info}}"
+            }
+          ],
+          "system_prompt": "",
+          "user_prompt": "# 角色\n你是一位专业的客户分析专家，擅长根据客户信息评估其价值等级和购买潜力。\n\n## 任务\n基于提供的客户信息：{{customer_data}}，进行客户分类和评估。\n\n## 分类标准\n- A类客户：大型企业，预算充足，决策权明确，有明确AI需求\n- B类客户：中型企业，有一定预算，需求相对明确\n- C类客户：小型企业或个人，预算有限，需求模糊\n\n## 输出要求\n请严格按照以下JSON格式输出：\n```json\n{\n  \"customer_level\": \"A/B/C\",\n  \"potential_value\": \"高/中/低\",\n  \"budget_estimate\": \"预估预算范围\",\n  \"decision_timeline\": \"预估决策周期\",\n  \"key_concerns\": \"主要关注点\",\n  \"recommended_approach\": \"推荐的销售策略\"\n}\n```",
+          "outputs": [
+            {
+              "name": "classification_result",
+              "type": "object"
+            }
+          ],
+          "max_tokens": 1000
+        }
+      },
+      {
+        "id": "needs_analysis",
+        "type": "llm", 
+        "name": "需求分析",
+        "position": {"x": 500, "y": 100},
+        "data": {
+          "model": "doubao-function-call-32k",
+          "single_or_batch": "single",
+          "inputs": [
+            {
+              "name": "inquiry",
+              "value": "{{inquiry_content}}"
+            },
+            {
+              "name": "customer_class",
+              "value": "{{classification_result}}"
+            }
+          ],
+          "system_prompt": "",
+          "user_prompt": "# 角色\n你是一位资深的需求分析师，擅长深入挖掘客户的真实需求和痛点。\n\n## 任务\n基于客户咨询内容：{{inquiry}} 和客户分类：{{customer_class}}，进行深度需求分析。\n\n## 分析维度\n1. 业务痛点识别\n2. 技术需求梳理\n3. 预算和时间约束\n4. 成功标准定义\n5. 决策影响因素\n\n## 输出格式\n```json\n{\n  \"core_needs\": [\"核心需求1\", \"核心需求2\", \"核心需求3\"],\n  \"pain_points\": [\"痛点1\", \"痛点2\", \"痛点3\"],\n  \"technical_requirements\": \"技术要求描述\",\n  \"budget_sensitivity\": \"价格敏感度分析\",\n  \"urgency_level\": \"紧急程度\",\n  \"success_criteria\": \"成功标准\",\n  \"potential_obstacles\": \"潜在阻碍因素\"\n}\n```",
+          "outputs": [
+            {
+              "name": "needs_analysis_result",
+              "type": "object"
+            }
+          ],
+          "max_tokens": 1500
+        }
+      },
+      {
+        "id": "product_recommendation",
+        "type": "llm",
+        "name": "产品推荐",
+        "position": {"x": 700, "y": 100},
+        "data": {
+          "model": "doubao-function-call-32k", 
+          "single_or_batch": "single",
+          "inputs": [
+            {
+              "name": "needs",
+              "value": "{{needs_analysis_result}}"
+            },
+            {
+              "name": "customer_level",
+              "value": "{{classification_result}}"
+            }
+          ],
+          "system_prompt": "",
+          "user_prompt": "# 角色\n你是AI产品专家，深度了解各类AI解决方案的特点和适用场景。\n\n## 产品库\n1. **智能客服机器人**\n   - 适用场景：客户服务优化、降低人力成本\n   - 价格范围：5-20万\n   - 实施周期：1-2个月\n   - 技术特点：24/7在线、多轮对话、情感识别\n\n2. **AI数据分析平台**\n   - 适用场景：商业决策支持、数据洞察\n   - 价格范围：10-50万\n   - 实施周期：2-3个月\n   - 技术特点：自动化报表、预测分析、可视化\n\n3. **智能流程自动化**\n   - 适用场景：业务流程优化、效率提升\n   - 价格范围：15-80万\n   - 实施周期：3-6个月\n   - 技术特点：工作流自动化、文档处理、审批流程\n\n4. **定制AI解决方案**\n   - 适用场景：特殊需求、深度定制\n   - 价格范围：50-200万\n   - 实施周期：6-12个月\n   - 技术特点：专属算法、定制化接口、个性化功能\n\n## 任务\n基于客户需求分析{{needs}}和客户等级{{customer_level}}，推荐最合适的产品组合。\n\n## 输出格式\n```json\n{\n  \"recommended_products\": [\n    {\n      \"product_name\": \"产品名称\",\n      \"match_score\": \"匹配度评分(1-10)\",\n      \"reasons\": \"推荐理由\",\n      \"expected_benefits\": \"预期收益\",\n      \"investment_range\": \"投资范围\",\n      \"implementation_plan\": \"实施建议\"\n    }\n  ],\n  \"total_investment\": \"总投资估算\",\n  \"roi_prediction\": \"投资回报预测\",\n  \"risk_assessment\": \"风险评估\"\n}\n```",
+          "outputs": [
+            {
+              "name": "product_recommendation_result",
+              "type": "object"
+            }
+          ],
+          "max_tokens": 2000
+        }
+      },
+      {
+        "id": "quote_generation",
+        "type": "llm",
+        "name": "报价生成",
+        "position": {"x": 900, "y": 100},
+        "data": {
+          "model": "doubao-function-call-32k",
+          "single_or_batch": "single",
+          "inputs": [
+            {
+              "name": "products",
+              "value": "{{product_recommendation_result}}"
+            },
+            {
+              "name": "customer_info",
+              "value": "{{classification_result}}"
+            }
+          ],
+          "system_prompt": "",
+          "user_prompt": "# 角色\n你是专业的商务报价专家，能够生成具有竞争力和吸引力的报价方案。\n\n## 定价策略\n- 基础价格：产品标准价格\n- 客户等级折扣：A类客户5%，B类客户8%，C类客户12%\n- 批量折扣：多产品组合额外5-10%折扣\n- 紧急项目：加急需求增加10-15%\n- 定制开发：根据复杂度单独核算\n\n## 任务\n基于推荐产品{{products}}和客户信息{{customer_info}}，生成详细报价方案。\n\n## 输出格式\n```json\n{\n  \"quote_number\": \"报价编号\",\n  \"valid_until\": \"报价有效期\",\n  \"items\": [\n    {\n      \"product_name\": \"产品名称\",\n      \"description\": \"产品描述\",\n      \"quantity\": \"数量\",\n      \"unit_price\": \"单价\",\n      \"discount\": \"折扣\",\n      \"subtotal\": \"小计\"\n    }\n  ],\n  \"total_before_discount\": \"折扣前总额\",\n  \"total_discount\": \"总折扣\",\n  \"final_total\": \"最终总价\",\n  \"payment_terms\": \"付款条件\",\n  \"delivery_schedule\": \"交付计划\",\n  \"warranty_terms\": \"质保条款\",\n  \"special_offers\": \"特别优惠\"\n}\n```",
+          "outputs": [
+            {
+              "name": "quote_result",
+              "type": "object"
+            }
+          ],
+          "max_tokens": 1500
+        }
+      },
+      {
+        "id": "proposal_generation",
+        "type": "llm",
+        "name": "提案生成",
+        "position": {"x": 1100, "y": 100},
+        "data": {
+          "model": "doubao-function-call-32k",
+          "single_or_batch": "single",
+          "inputs": [
+            {
+              "name": "customer_analysis",
+              "value": "{{classification_result}}"
+            },
+            {
+              "name": "needs_analysis",
+              "value": "{{needs_analysis_result}}"
+            },
+            {
+              "name": "product_recommendation",
+              "value": "{{product_recommendation_result}}"
+            },
+            {
+              "name": "quote",
+              "value": "{{quote_result}}"
+            }
+          ],
+          "system_prompt": "",
+          "user_prompt": "# 角色\n你是资深商务提案专家，擅长撰写专业、有说服力的商业提案。\n\n## 提案结构\n1. 执行摘要\n2. 客户需求分析\n3. 解决方案概述\n4. 技术实施方案\n5. 项目实施计划\n6. 投资回报分析\n7. 风险评估与应对\n8. 商务条款\n9. 公司资质介绍\n\n## 任务\n基于以下信息生成专业提案：\n- 客户分析：{{customer_analysis}}\n- 需求分析：{{needs_analysis}}\n- 产品推荐：{{product_recommendation}}\n- 报价信息：{{quote}}\n\n## 输出要求\n以Markdown格式输出完整提案内容，要求：\n1. 结构清晰，逻辑严密\n2. 内容专业，针对性强\n3. 数据详实，有说服力\n4. 格式美观，易于阅读",
+          "outputs": [
+            {
+              "name": "proposal_content",
+              "type": "string"
+            }
+          ],
+          "max_tokens": 4000
+        }
+      },
+      {
+        "id": "follow_up_strategy",
+        "type": "llm",
+        "name": "跟进策略制定",
+        "position": {"x": 300, "y": 300},
+        "data": {
+          "model": "doubao-function-call-32k",
+          "single_or_batch": "single",
+          "inputs": [
+            {
+              "name": "customer_profile",
+              "value": "{{classification_result}}"
+            },
+            {
+              "name": "proposal_sent",
+              "value": "true"
+            }
+          ],
+          "system_prompt": "",
+          "user_prompt": "# 角色\n你是经验丰富的销售策略专家，擅长制定个性化的客户跟进策略。\n\n## 跟进原则\n- A类客户：24小时内首次跟进，后续每2-3天跟进一次\n- B类客户：48小时内首次跟进，后续每周跟进一次\n- C类客户：72小时内首次跟进，后续每两周跟进一次\n\n## 任务\n基于客户档案{{customer_profile}}，制定详细的跟进策略。\n\n## 输出格式\n```json\n{\n  \"follow_up_schedule\": [\n    {\n      \"day\": \"跟进日期\",\n      \"action\": \"跟进动作\",\n      \"content\": \"沟通内容\",\n      \"goal\": \"预期目标\"\n    }\n  ],\n  \"communication_channels\": [\"邮件\", \"电话\", \"微信\", \"上门拜访\"],\n  \"key_messages\": \"核心沟通要点\",\n  \"success_indicators\": \"成功指标\",\n  \"escalation_triggers\": \"升级触发条件\",\n  \"alternative_strategies\": \"备选策略\"\n}\n```",
+          "outputs": [
+            {
+              "name": "follow_up_plan",
+              "type": "object"
+            }
+          ],
+          "max_tokens": 1500
+        }
+      },
+      {
+        "id": "roi_calculator",
+        "type": "code",
+        "name": "ROI计算器",
+        "position": {"x": 500, "y": 300},
+        "data": {
+          "language": "python",
+          "code": "import json\nimport math\n\ndef main(args):\n    # 获取输入参数\n    quote_data = args.get('quote_info', {})\n    customer_data = args.get('customer_info', {})\n    \n    try:\n        # 解析JSON字符串如果需要\n        if isinstance(quote_data, str):\n            quote_data = json.loads(quote_data)\n        if isinstance(customer_data, str):\n            customer_data = json.loads(customer_data)\n        \n        # 基本参数\n        total_investment = float(quote_data.get('final_total', 0))\n        customer_level = customer_data.get('customer_level', 'C')\n        \n        # 根据客户等级预估年收益\n        if customer_level == 'A':\n            annual_savings = total_investment * 0.8  # 大客户效率提升显著\n            risk_factor = 0.1\n        elif customer_level == 'B':\n            annual_savings = total_investment * 0.6  # 中等客户\n            risk_factor = 0.15\n        else:\n            annual_savings = total_investment * 0.4  # 小客户\n            risk_factor = 0.2\n        \n        # 计算ROI指标\n        payback_period = total_investment / annual_savings if annual_savings > 0 else float('inf')\n        roi_1_year = ((annual_savings - total_investment) / total_investment) * 100 if total_investment > 0 else 0\n        roi_3_year = ((annual_savings * 3 - total_investment) / total_investment) * 100 if total_investment > 0 else 0\n        \n        # NPV计算（假设折现率为10%）\n        discount_rate = 0.1\n        npv = -total_investment\n        for year in range(1, 4):\n            npv += annual_savings / ((1 + discount_rate) ** year)\n        \n        # 生成结果\n        result = {\n            \"total_investment\": total_investment,\n            \"annual_savings\": annual_savings,\n            \"payback_period_months\": round(payback_period * 12, 1),\n            \"roi_1_year_percent\": round(roi_1_year, 2),\n            \"roi_3_year_percent\": round(roi_3_year, 2),\n            \"npv_3_year\": round(npv, 2),\n            \"risk_assessment\": {\n                \"risk_level\": \"低\" if risk_factor < 0.15 else \"中\" if risk_factor < 0.25 else \"高\",\n                \"success_probability\": round((1 - risk_factor) * 100, 1)\n            },\n            \"recommendation\": \"推荐投资\" if roi_1_year > 20 and payback_period < 2 else \"需要评估\" if roi_1_year > 0 else \"不建议投资\"\n        }\n        \n        return {\"roi_analysis\": result}\n        \n    except Exception as e:\n        return {\"roi_analysis\": {\"error\": str(e), \"total_investment\": 0}}\n\n# Coze工作流入口函数\ndef handler(args):\n    return main(args)",
+          "inputs": [
+            {
+              "name": "quote_info",
+              "value": "{{quote_result}}"
+            },
+            {
+              "name": "customer_info", 
+              "value": "{{classification_result}}"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "roi_analysis",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      {
+        "id": "end_node",
+        "type": "end",
+        "name": "结束节点", 
+        "position": {"x": 700, "y": 500},
+        "data": {
+          "output_mode": "direct_answer",
+          "stream_output": true,
+          "output_variables": [
+            {
+              "name": "customer_classification",
+              "value": "{{classification_result}}"
+            },
+            {
+              "name": "needs_analysis",
+              "value": "{{needs_analysis_result}}"
+            },
+            {
+              "name": "product_recommendations",
+              "value": "{{product_recommendation_result}}"
+            },
+            {
+              "name": "quote_details",
+              "value": "{{quote_result}}"
+            },
+            {
+              "name": "proposal",
+              "value": "{{proposal_content}}"
+            },
+            {
+              "name": "follow_up_strategy",
+              "value": "{{follow_up_plan}}"
+            },
+            {
+              "name": "roi_analysis",
+              "value": "{{roi_analysis}}"
+            }
+          ],
+          "answer_content": "# AI销售工作流执行结果\n\n## 📊 客户分析\n```json\n{{customer_classification}}\n```\n\n## 🎯 需求分析\n```json\n{{needs_analysis}}\n```\n\n## 💡 产品推荐\n```json\n{{product_recommendations}}\n```\n\n## 💰 报价方案\n```json\n{{quote_details}}\n```\n\n## 📈 ROI分析\n```json\n{{roi_analysis}}\n```\n\n## 📋 商业提案\n{{proposal}}\n\n## 🎯 跟进策略\n```json\n{{follow_up_strategy}}\n```\n\n---\n\n**工作流执行完成** ✅\n\n您可以基于以上分析结果，进行下一步的销售活动。如需调整任何环节，请重新运行相应的工作流节点。"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge1",
+        "source": "start_node",
+        "target": "customer_classification"
+      },
+      {
+        "id": "edge2", 
+        "source": "customer_classification",
+        "target": "needs_analysis"
+      },
+      {
+        "id": "edge3",
+        "source": "needs_analysis",
+        "target": "product_recommendation"
+      },
+      {
+        "id": "edge4",
+        "source": "product_recommendation", 
+        "target": "quote_generation"
+      },
+      {
+        "id": "edge5",
+        "source": "quote_generation",
+        "target": "proposal_generation"
+      },
+      {
+        "id": "edge6",
+        "source": "customer_classification",
+        "target": "follow_up_strategy"
+      },
+      {
+        "id": "edge7",
+        "source": "quote_generation",
+        "target": "roi_calculator"
+      },
+      {
+        "id": "edge8",
+        "source": "proposal_generation",
+        "target": "end_node"
+      },
+      {
+        "id": "edge9",
+        "source": "follow_up_strategy", 
+        "target": "end_node"
+      },
+      {
+        "id": "edge10",
+        "source": "roi_calculator",
+        "target": "end_node"
+      }
+    ]
+  },
+  "metadata": {
+    "created_at": "2024-01-20",
+    "updated_at": "2024-01-20",
+    "version": "1.0.0",
+    "author": "AI Assistant",
+    "tags": ["销售", "AI", "客户管理", "报价", "跟进"],
+    "description": "完整的AI销售工作流，包含客户分类、需求分析、产品推荐、报价生成、提案制作、跟进策略等功能"
+  }
+}
