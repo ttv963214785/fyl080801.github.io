@@ -1,0 +1,470 @@
+{
+  "workflow_name": "AI销售工作流",
+  "workflow_id": "ai_sales_workflow_v1",
+  "description": "智能AI销售工作流程，从客户识别到成交的全流程自动化",
+  "version": "1.0.0",
+  "created_by": "AI Assistant",
+  "workflow_config": {
+    "trigger": {
+      "type": "manual_or_webhook",
+      "description": "手动触发或通过客户咨询触发"
+    },
+    "stages": [
+      {
+        "stage_id": "customer_identification",
+        "stage_name": "客户识别与分类",
+        "description": "识别客户基本信息并进行分类",
+        "tools": [
+          {
+            "tool_name": "客户信息收集器",
+            "tool_type": "form_collector",
+            "parameters": {
+              "fields": [
+                {
+                  "name": "company_name",
+                  "label": "公司名称",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "contact_person",
+                  "label": "联系人",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "position",
+                  "label": "职位",
+                  "type": "text",
+                  "required": false
+                },
+                {
+                  "name": "industry",
+                  "label": "行业",
+                  "type": "select",
+                  "options": ["科技", "金融", "制造业", "教育", "医疗", "零售", "其他"],
+                  "required": true
+                },
+                {
+                  "name": "company_size",
+                  "label": "公司规模",
+                  "type": "select",
+                  "options": ["1-50人", "51-200人", "201-500人", "500-1000人", "1000人以上"],
+                  "required": true
+                },
+                {
+                  "name": "contact_method",
+                  "label": "联系方式",
+                  "type": "text",
+                  "required": true
+                }
+              ]
+            }
+          },
+          {
+            "tool_name": "客户分类AI",
+            "tool_type": "ai_classifier",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "基于以下客户信息，将客户分类为：A类(高价值)、B类(中等价值)、C类(潜在价值)。\n公司: {company_name}\n行业: {industry}\n规模: {company_size}\n联系人职位: {position}\n\n分析客户的购买潜力和价值等级。",
+              "output_format": {
+                "customer_level": "A/B/C",
+                "potential_value": "数值评估",
+                "reasoning": "分类理由"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "customer_level != null"
+      },
+      {
+        "stage_id": "needs_analysis",
+        "stage_name": "需求分析",
+        "description": "深入了解客户需求和痛点",
+        "tools": [
+          {
+            "tool_name": "需求调研问卷",
+            "tool_type": "dynamic_form",
+            "parameters": {
+              "form_logic": "根据客户等级和行业生成个性化问卷",
+              "questions": [
+                {
+                  "question": "您当前面临的主要业务挑战是什么？",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "question": "您希望通过AI技术解决哪些具体问题？",
+                  "type": "multiple_choice",
+                  "options": [
+                    "提高工作效率",
+                    "降低运营成本",
+                    "改善客户体验",
+                    "数据分析和洞察",
+                    "自动化流程",
+                    "其他"
+                  ]
+                },
+                {
+                  "question": "您的预算范围是多少？",
+                  "type": "select",
+                  "options": ["1-10万", "10-50万", "50-100万", "100万以上", "待定"]
+                },
+                {
+                  "question": "您希望何时开始实施AI解决方案？",
+                  "type": "select",
+                  "options": ["立即", "1个月内", "3个月内", "半年内", "一年内"]
+                }
+              ]
+            }
+          },
+          {
+            "tool_name": "需求分析AI",
+            "tool_type": "ai_analyzer",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "基于客户的回答，分析其真实需求和痛点：\n\n客户信息：\n- 公司：{company_name}\n- 行业：{industry}\n- 规模：{company_size}\n- 等级：{customer_level}\n\n客户回答：{survey_responses}\n\n请提供：\n1. 核心需求分析\n2. 痛点识别\n3. 解决方案建议\n4. 优先级排序",
+              "output_format": {
+                "core_needs": "核心需求列表",
+                "pain_points": "痛点分析",
+                "solution_suggestions": "解决方案建议",
+                "priority_ranking": "优先级排序"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "core_needs != null"
+      },
+      {
+        "stage_id": "product_recommendation",
+        "stage_name": "产品推荐",
+        "description": "基于需求分析推荐合适的AI产品和服务",
+        "tools": [
+          {
+            "tool_name": "产品匹配引擎",
+            "tool_type": "recommendation_engine",
+            "parameters": {
+              "product_database": {
+                "ai_chatbot": {
+                  "name": "智能客服机器人",
+                  "description": "24/7智能客服，提升客户服务效率",
+                  "suitable_for": ["客户服务", "降低人力成本"],
+                  "price_range": "5-20万",
+                  "implementation_time": "1-2个月"
+                },
+                "data_analytics": {
+                  "name": "AI数据分析平台",
+                  "description": "智能数据分析和商业洞察",
+                  "suitable_for": ["数据分析", "商业决策"],
+                  "price_range": "10-50万",
+                  "implementation_time": "2-3个月"
+                },
+                "process_automation": {
+                  "name": "智能流程自动化",
+                  "description": "业务流程智能化改造",
+                  "suitable_for": ["流程优化", "效率提升"],
+                  "price_range": "15-80万",
+                  "implementation_time": "3-6个月"
+                },
+                "custom_ai": {
+                  "name": "定制AI解决方案",
+                  "description": "针对特定需求的定制化AI开发",
+                  "suitable_for": ["特殊需求", "深度定制"],
+                  "price_range": "50-200万",
+                  "implementation_time": "6-12个月"
+                }
+              },
+              "matching_algorithm": "基于需求匹配度、预算匹配度、实施时间匹配度的综合评分"
+            }
+          },
+          {
+            "tool_name": "产品推荐AI",
+            "tool_type": "ai_recommender",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "基于客户需求分析，从产品库中推荐最合适的AI解决方案：\n\n客户需求：{core_needs}\n痛点：{pain_points}\n预算：{budget}\n时间要求：{timeline}\n\n可选产品：{product_options}\n\n请提供：\n1. 推荐产品列表（按优先级排序）\n2. 推荐理由\n3. 预期效果\n4. 实施建议",
+              "output_format": {
+                "recommended_products": "推荐产品列表",
+                "recommendation_reasons": "推荐理由",
+                "expected_benefits": "预期效果",
+                "implementation_plan": "实施建议"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "recommended_products != null"
+      },
+      {
+        "stage_id": "quote_generation",
+        "stage_name": "报价生成",
+        "description": "生成个性化的报价方案",
+        "tools": [
+          {
+            "tool_name": "智能报价生成器",
+            "tool_type": "quote_generator",
+            "parameters": {
+              "pricing_rules": {
+                "base_pricing": "产品基础价格",
+                "volume_discount": "根据采购量给予折扣",
+                "industry_discount": "特定行业折扣",
+                "timeline_premium": "紧急项目加价",
+                "customization_fee": "定制化开发费用"
+              },
+              "quote_template": {
+                "header": "公司信息和报价编号",
+                "customer_info": "客户基本信息",
+                "product_details": "产品详细描述",
+                "pricing_breakdown": "价格明细",
+                "terms_conditions": "商务条款",
+                "validity_period": "报价有效期"
+              }
+            }
+          },
+          {
+            "tool_name": "报价优化AI",
+            "tool_type": "ai_optimizer",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "基于客户信息和产品推荐，生成个性化报价方案：\n\n客户等级：{customer_level}\n推荐产品：{recommended_products}\n预算范围：{budget}\n\n优化策略：\n1. 价格敏感性分析\n2. 竞争力评估\n3. 成交概率预测\n4. 个性化调整建议",
+              "output_format": {
+                "optimized_quote": "优化后报价",
+                "pricing_strategy": "定价策略",
+                "success_probability": "成交概率",
+                "negotiation_tips": "谈判建议"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "optimized_quote != null"
+      },
+      {
+        "stage_id": "proposal_creation",
+        "stage_name": "提案制作",
+        "description": "生成专业的AI解决方案提案",
+        "tools": [
+          {
+            "tool_name": "提案生成器",
+            "tool_type": "document_generator",
+            "parameters": {
+              "template_sections": [
+                "执行摘要",
+                "客户需求分析",
+                "解决方案概述",
+                "技术架构",
+                "实施计划",
+                "预期收益",
+                "投资回报分析",
+                "风险评估",
+                "商务条款",
+                "公司介绍"
+              ],
+              "design_template": "professional_ai_theme"
+            }
+          },
+          {
+            "tool_name": "提案内容AI",
+            "tool_type": "ai_writer",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "生成专业的AI解决方案提案内容：\n\n客户信息：{customer_info}\n需求分析：{needs_analysis}\n推荐方案：{recommended_solution}\n报价信息：{quote_details}\n\n要求：\n1. 专业性强\n2. 针对性强\n3. 逻辑清晰\n4. 说服力强",
+              "output_format": {
+                "executive_summary": "执行摘要",
+                "detailed_proposal": "详细提案内容",
+                "roi_analysis": "投资回报分析",
+                "implementation_timeline": "实施时间表"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "detailed_proposal != null"
+      },
+      {
+        "stage_id": "follow_up_strategy",
+        "stage_name": "跟进策略",
+        "description": "制定个性化的客户跟进策略",
+        "tools": [
+          {
+            "tool_name": "跟进策略AI",
+            "tool_type": "ai_strategist",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "基于客户信息和互动历史，制定个性化跟进策略：\n\n客户等级：{customer_level}\n成交概率：{success_probability}\n客户行为特征：{customer_behavior}\n\n制定：\n1. 跟进时间表\n2. 沟通策略\n3. 内容规划\n4. 激励措施",
+              "output_format": {
+                "follow_up_schedule": "跟进时间表",
+                "communication_strategy": "沟通策略",
+                "content_plan": "内容规划",
+                "incentive_offers": "激励措施"
+              }
+            }
+          },
+          {
+            "tool_name": "自动化跟进系统",
+            "tool_type": "automation_system",
+            "parameters": {
+              "trigger_conditions": [
+                "提案发送后24小时无回应",
+                "客户查看提案",
+                "客户提出问题",
+                "竞争对手活动"
+              ],
+              "action_types": [
+                "发送个性化邮件",
+                "安排电话回访",
+                "提供补充资料",
+                "调整报价方案"
+              ]
+            }
+          }
+        ],
+        "next_stage_condition": "follow_up_schedule != null"
+      },
+      {
+        "stage_id": "negotiation_support",
+        "stage_name": "谈判支持",
+        "description": "AI辅助销售谈判",
+        "tools": [
+          {
+            "tool_name": "谈判助手AI",
+            "tool_type": "ai_negotiator",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "为销售谈判提供实时建议：\n\n客户关注点：{customer_concerns}\n当前报价：{current_quote}\n竞争对手情况：{competitor_info}\n\n提供：\n1. 谈判策略\n2. 让步方案\n3. 话术建议\n4. 风险提醒",
+              "output_format": {
+                "negotiation_strategy": "谈判策略",
+                "concession_plan": "让步方案",
+                "talking_points": "话术建议",
+                "risk_alerts": "风险提醒"
+              }
+            }
+          },
+          {
+            "tool_name": "实时价格调整器",
+            "tool_type": "dynamic_pricing",
+            "parameters": {
+              "adjustment_rules": {
+                "max_discount": "最大折扣限制",
+                "approval_required": "需要审批的调整范围",
+                "competitor_pricing": "竞争对手价格监控",
+                "profit_margin": "最低利润率保护"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "negotiation_complete == true"
+      },
+      {
+        "stage_id": "contract_generation",
+        "stage_name": "合同生成",
+        "description": "自动生成标准化合同",
+        "tools": [
+          {
+            "tool_name": "智能合同生成器",
+            "tool_type": "contract_generator",
+            "parameters": {
+              "contract_templates": {
+                "standard_ai_service": "标准AI服务合同",
+                "custom_development": "定制开发合同",
+                "saas_subscription": "SaaS订阅合同",
+                "consulting_service": "咨询服务合同"
+              },
+              "legal_compliance": "确保合同符合相关法律法规"
+            }
+          },
+          {
+            "tool_name": "合同条款AI",
+            "tool_type": "ai_legal_assistant",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "基于谈判结果生成合同条款：\n\n最终商务条件：{final_terms}\n服务内容：{service_details}\n付款方式：{payment_terms}\n\n生成：\n1. 详细服务条款\n2. 责任界定\n3. 知识产权条款\n4. 违约责任",
+              "output_format": {
+                "service_clauses": "服务条款",
+                "liability_terms": "责任条款",
+                "ip_clauses": "知识产权条款",
+                "penalty_terms": "违约条款"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "contract_ready == true"
+      },
+      {
+        "stage_id": "post_sale_handover",
+        "stage_name": "售后交接",
+        "description": "销售到实施的无缝交接",
+        "tools": [
+          {
+            "tool_name": "项目交接生成器",
+            "tool_type": "handover_generator",
+            "parameters": {
+              "handover_documents": [
+                "客户需求文档",
+                "技术方案文档",
+                "项目实施计划",
+                "风险评估报告",
+                "客户联系信息",
+                "特殊要求说明"
+              ]
+            }
+          },
+          {
+            "tool_name": "客户成功预测AI",
+            "tool_type": "ai_predictor",
+            "parameters": {
+              "model": "gpt-4",
+              "prompt_template": "分析客户成功概率和潜在风险：\n\n客户特征：{customer_profile}\n项目复杂度：{project_complexity}\n资源配置：{resource_allocation}\n\n预测：\n1. 项目成功概率\n2. 潜在风险点\n3. 关键成功因素\n4. 监控指标",
+              "output_format": {
+                "success_probability": "成功概率",
+                "risk_factors": "风险因素",
+                "success_factors": "成功因素",
+                "kpi_metrics": "关键指标"
+              }
+            }
+          }
+        ],
+        "next_stage_condition": "handover_complete == true"
+      }
+    ],
+    "global_settings": {
+      "ai_models": {
+        "primary": "gpt-4",
+        "fallback": "gpt-3.5-turbo",
+        "specialized": {
+          "document_generation": "claude-3",
+          "data_analysis": "gpt-4",
+          "conversation": "gpt-4"
+        }
+      },
+      "integration_apis": [
+        "CRM系统API",
+        "邮件营销平台API",
+        "文档生成API",
+        "电子签名API",
+        "财务系统API"
+      ],
+      "data_storage": {
+        "customer_data": "加密存储",
+        "interaction_logs": "7年保存期",
+        "analytics_data": "实时更新"
+      },
+      "compliance": {
+        "data_privacy": "GDPR/个人信息保护法合规",
+        "security": "ISO27001标准",
+        "audit_trail": "完整审计日志"
+      }
+    },
+    "performance_metrics": {
+      "conversion_rate": "转化率监控",
+      "cycle_time": "销售周期时间",
+      "customer_satisfaction": "客户满意度",
+      "ai_accuracy": "AI预测准确率",
+      "cost_per_acquisition": "获客成本",
+      "revenue_per_customer": "客户价值"
+    },
+    "continuous_improvement": {
+      "feedback_collection": "收集客户和销售团队反馈",
+      "model_retraining": "定期重训练AI模型",
+      "process_optimization": "基于数据优化流程",
+      "a_b_testing": "A/B测试不同策略效果"
+    }
+  }
+}
